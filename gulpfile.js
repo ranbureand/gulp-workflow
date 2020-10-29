@@ -1,7 +1,29 @@
 const gulp = require('gulp');
 const { dest, parallel, series, src, watch } = require('gulp');
+const imageResize = require("gulp-image-resize");
 const rename = require("gulp-rename");
+//const gm = require("gulp-gm"); // to remove
 
+const sizes = [
+ {
+   width: 360,
+ },
+ {
+   width: 720,
+ },
+ {
+   width: 1080,
+ },
+ {
+   width: 1440,
+ },
+ {
+   width: 2160,
+ },
+ {
+   width: 2880,
+ },
+];
 
 function hello(cb) {
   console.log('Hello world!');
@@ -9,8 +31,23 @@ function hello(cb) {
   cb();
 }
 
+
 function copy(cb) {
-  return src('media/projects/**/images/src/*.txt')
+  return src('media/projects/**/images/src/*.*')
+    .pipe(imageResize({
+      width : 300,
+      height : 0,
+      colorspace: 'sRGB',
+      crop : false,
+      filter: 'Lanczos',
+      format: 'jpeg',
+      interlace: true,
+      imageMagick: true,
+      noProfile: true,
+      quality: 0.88,
+      sharpen: '0.5x0.5+0.5+0.1',
+      upscale : false
+    }))
     .pipe(rename(function (path) {
         path.dirname = path.dirname.replace(/src/i,'360');
     }))
