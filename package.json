@@ -1,0 +1,25 @@
+{
+  "name": "gulp-workflow",
+  "version": "1.0.0",
+  "description": "Workflow to ease",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ranbureand/gulp-workflow.git"
+  },
+  "keywords": [
+    "workflow"
+  ],
+  "author": "Andrea",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ranbureand/gulp-workflow/issues"
+  },
+  "homepage": "https://github.com/ranbureand/gulp-workflow#readme",
+  "devDependencies": {
+    "gulp": "^4.0.2"
+  }
+}
