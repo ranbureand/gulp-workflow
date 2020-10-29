@@ -1,5 +1,5 @@
 const gulp = require('gulp');
-const { dest, parallel, series, src } = require('gulp');
+const { dest, parallel, series, src, watch } = require('gulp');
 
 function hello(cb) {
   console.log('Hello world!');
@@ -9,7 +9,7 @@ function hello(cb) {
 
 function copy(cb) {
   return src('source/*.txt')
-    .pipe(dest('destination'));
+    .pipe( dest('destination') );
 
   cb();
 }
@@ -25,4 +25,8 @@ exports.copy = copy;
 // A composition of tasks composed with series() ends after an error
 // See https://gulpjs.com/docs/en/getting-started/creating-tasks
 
-exports.default = hello;
+//exports.default = hello;
+
+exports.default = function() {
+  watch('source/*.txt', series(hello, copy));
+};
