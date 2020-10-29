@@ -21,5 +21,8 @@
   "homepage": "https://github.com/ranbureand/gulp-workflow#readme",
   "devDependencies": {
     "gulp": "^4.0.2"
+  },
+  "dependencies": {
+    "gulp-rename": "^2.0.0"
   }
 }

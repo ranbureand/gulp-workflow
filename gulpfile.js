@@ -1,5 +1,7 @@
 const gulp = require('gulp');
 const { dest, parallel, series, src, watch } = require('gulp');
+const rename = require("gulp-rename");
+
 
 function hello(cb) {
   console.log('Hello world!');
@@ -8,8 +10,11 @@ function hello(cb) {
 }
 
 function copy(cb) {
-  return src('source/*.txt')
-    .pipe( dest('destination') );
+  return src('media/projects/**/images/src/*.txt')
+    .pipe(rename(function (path) {
+        path.dirname = path.dirname.replace(/src/i,'360');
+    }))
+    .pipe( dest('media/projects') );
 
   cb();
 }
