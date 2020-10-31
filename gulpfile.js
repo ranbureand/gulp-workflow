@@ -1,35 +1,63 @@
-const gulp = require('gulp');
-const { dest, parallel, series, src, watch } = require('gulp');
-const imageResize = require("gulp-image-resize");
-const rename = require("gulp-rename");
-const sizeOf = require('image-size');
-const merge2 = require("merge2");
-var newer = require('gulp-newer');
-//const gm = require("gulp-gm"); // to remove
+// -------------------------------------
+// Packages
+// -------------------------------------
+
+const gulp = require('gulp'),
+      { dest, parallel, series, src, watch } = require('gulp'),
+      imageResize = require("gulp-image-resize"),
+      log = require('fancy-log'),
+      merge2 = require("merge2"),
+      newer = require('gulp-newer'),
+      rename = require("gulp-rename"),
+      tap = require('gulp-tap');
+
+const imageSource = 'media/projects/**/images/src/*.*',
+      imageDestination = 'media/projects'
+
+// -------------------------------------
+// Variables, constants, …
+// -------------------------------------
+
+var   projectName;
+
+/*
+** Properties of the various transformations on the images
+*/
 
 const transformations = [
  {
    width: 360,
+   sharpen: '0.5x0.5+0.5+0.1'
  },
  {
    width: 720,
+   sharpen: '0.5x0.5+0.5+0.1'
  },
  {
    width: 1080,
+   sharpen: '0.5x0.5+0.5+0.1'
  },
  {
    width: 1440,
+   sharpen: '0.5x0.5+0.5+0.1'
  },
  {
    width: 2160,
+   sharpen: '0.5x0.5+0.5+0.1'
  },
  {
    width: 2880,
+   sharpen: '0.5x0.5+0.5+0.1'
  },
 ];
 
-const imageSrc = 'media/projects/**/images/src/*.*',
-      imageDest = 'media/projects'
+// -------------------------------------
+// Tasks
+// -------------------------------------
+
+/*
+** Hello world!
+*/
 
 function hello(cb) {
   console.log('Hello world!');
@@ -37,34 +65,60 @@ function hello(cb) {
   cb();
 }
 
-function copy(cb) {
+/*
+** Hello world!
+*/
 
+function resize(cb) {
+
+  // Create an array
   const streams = [];
 
+  // Go through the array of transformations
   transformations.forEach(function (transformation) {
     streams.push(
-      src(imageSrc, { nodir: true })
+      src(imageSource, { nodir: true }) // ignore empty directories
+      // Retrieve the name of the project folder and save it in the global variable 'projectName'
+      .pipe(tap(function(file, t) {
+        // Cut the name of the project out from the path to the file
+        projectName = file.path.substring(
+          file.path.lastIndexOf("/projects/") + 10,
+          file.path.lastIndexOf("/images/")
+        );
+       }))
+      .on('end', function() { console.log(projectName) })
+      .pipe(
+        newer(
+          imageDestination +
+          '/' +
+          projectName +
+          '/images/' +
+          transformation.width
+        )
+      )
+      // Resize the image
       .pipe(imageResize({
         width : transformation.width,
         height : 0,
         colorspace: 'sRGB',
         crop : false,
         filter: 'Lanczos',
-        format: 'jpeg',
+        format: 'jpg',
         interlace: true,
         imageMagick: true,
         noProfile: true,
         quality: 0.88,
-        sharpen: '0.5x0.5+0.5+0.1',
+        sharpen: transformation.sharpen,
         upscale : false
       }))
       .pipe(rename(function (path) {
           path.dirname = path.dirname.replace(/src/i, transformation.width.toString());
       }))
-      .pipe(dest(imageDest))
+      .pipe(dest(imageDestination))
     );
   });
 
+  // Merge the streams
   return merge2(streams);
 
   cb();
@@ -75,14 +129,12 @@ function copy(cb) {
 // See https://gulpjs.com/docs/en/getting-started/creating-tasks
 
 exports.hello = hello;
-exports.copy = copy;
+exports.resize = resize;
 
 // Use series() and parallel() to compose tasks
 // A composition of tasks composed with series() ends after an error
 // See https://gulpjs.com/docs/en/getting-started/creating-tasks
 
-//exports.default = hello;
-
 exports.default = function() {
-  watch('source/*.txt', series(hello, copy));
+  watch(imageSource, series(resize));
 };
