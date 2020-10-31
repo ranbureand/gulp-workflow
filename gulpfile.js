@@ -2,9 +2,12 @@ const gulp = require('gulp');
 const { dest, parallel, series, src, watch } = require('gulp');
 const imageResize = require("gulp-image-resize");
 const rename = require("gulp-rename");
+const sizeOf = require('image-size');
+const merge2 = require("merge2");
+var newer = require('gulp-newer');
 //const gm = require("gulp-gm"); // to remove
 
-const sizes = [
+const transformations = [
  {
    width: 360,
  },
@@ -25,33 +28,44 @@ const sizes = [
  },
 ];
 
+const imageSrc = 'media/projects/**/images/src/*.*',
+      imageDest = 'media/projects'
+
 function hello(cb) {
   console.log('Hello world!');
 
   cb();
 }
 
-
 function copy(cb) {
-  return src('media/projects/**/images/src/*.*')
-    .pipe(imageResize({
-      width : 300,
-      height : 0,
-      colorspace: 'sRGB',
-      crop : false,
-      filter: 'Lanczos',
-      format: 'jpeg',
-      interlace: true,
-      imageMagick: true,
-      noProfile: true,
-      quality: 0.88,
-      sharpen: '0.5x0.5+0.5+0.1',
-      upscale : false
-    }))
-    .pipe(rename(function (path) {
-        path.dirname = path.dirname.replace(/src/i,'360');
-    }))
-    .pipe( dest('media/projects') );
+
+  const streams = [];
+
+  transformations.forEach(function (transformation) {
+    streams.push(
+      src(imageSrc, { nodir: true })
+      .pipe(imageResize({
+        width : transformation.width,
+        height : 0,
+        colorspace: 'sRGB',
+        crop : false,
+        filter: 'Lanczos',
+        format: 'jpeg',
+        interlace: true,
+        imageMagick: true,
+        noProfile: true,
+        quality: 0.88,
+        sharpen: '0.5x0.5+0.5+0.1',
+        upscale : false
+      }))
+      .pipe(rename(function (path) {
+          path.dirname = path.dirname.replace(/src/i, transformation.width.toString());
+      }))
+      .pipe(dest(imageDest))
+    );
+  });
+
+  return merge2(streams);
 
   cb();
 }
