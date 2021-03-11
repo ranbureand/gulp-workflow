@@ -4,15 +4,17 @@
 
 const gulp = require('gulp'),
       { dest, parallel, series, src, watch } = require('gulp'),
-      imageResize = require("gulp-image-resize"),
+      imageResize = require('gulp-image-resize'),
       log = require('fancy-log'),
-      merge2 = require("merge2"),
+      merge2 = require('merge2'),
       newer = require('gulp-newer'),
-      rename = require("gulp-rename"),
+      rename = require('gulp-rename'),
       tap = require('gulp-tap');
 
-const imageSource = 'media/projects/**/images/src/*.*',
-      imageDestination = 'media/projects'
+const thumbnailsSource = 'media/projects/**/thumbnails/*.*',
+      thumbnailsDestination = 'media/projects-optimized',
+      imagesSource = 'media/projects/**/images/*.*',
+      imagesDestination = 'media/projects-optimized';
 
 // -------------------------------------
 // Variables, constants, …
@@ -21,33 +23,56 @@ const imageSource = 'media/projects/**/images/src/*.*',
 var   projectName;
 
 /*
-** Properties of the various transformations on the images
+** Properties of the various transformations on the thumbnails
 */
 
-const transformations = [
+const thumbnailTransformations = [
  {
    width: 360,
-   sharpen: '0.5x0.5+0.5+0.1'
+   sharpen: '0.25x0.25+0.25+0.05' // 0.5x0.5+0.5+0.1
  },
  {
    width: 720,
-   sharpen: '0.5x0.5+0.5+0.1'
+   sharpen: '0.25x0.25+0.25+0.05'
  },
  {
    width: 1080,
-   sharpen: '0.5x0.5+0.5+0.1'
+   sharpen: '0.25x0.25+0.25+0.05'
  },
  {
    width: 1440,
-   sharpen: '0.5x0.5+0.5+0.1'
+   sharpen: '0.25x0.25+0.25+0.05'
+ },
+];
+
+/*
+** Properties of the various transformations on the images
+*/
+
+const imageTransformations = [
+ {
+   width: 360,
+   sharpen: '0.25x0.25+0.25+0.05' // 0.5x0.5+0.5+0.1
+ },
+ {
+   width: 720,
+   sharpen: '0.25x0.25+0.25+0.05'
+ },
+ {
+   width: 1080,
+   sharpen: '0.25x0.25+0.25+0.05'
+ },
+ {
+   width: 1440,
+   sharpen: '0.25x0.25+0.25+0.05'
  },
  {
    width: 2160,
-   sharpen: '0.5x0.5+0.5+0.1'
+   sharpen: '0.25x0.25+0.25+0.05'
  },
  {
    width: 2880,
-   sharpen: '0.5x0.5+0.5+0.1'
+   sharpen: '0.25x0.25+0.25+0.05'
  },
 ];
 
@@ -66,18 +91,78 @@ function hello(cb) {
 }
 
 /*
-** Hello world!
+** Resize thumbnails
 */
 
-function resize(cb) {
+function resizeThumbnails(cb) {
 
   // Create an array
   const streams = [];
 
   // Go through the array of transformations
-  transformations.forEach(function (transformation) {
+  thumbnailTransformations.forEach(function (transformation) {
     streams.push(
-      src(imageSource, { nodir: true }) // ignore empty directories
+      src(thumbnailsSource, { nodir: true }) // ignore empty directories
+      // Retrieve the name of the project folder and save it in the global variable 'projectName'
+      .pipe(tap(function(file, t) {
+        // Cut the name of the project out from the path to the file
+        projectName = file.path.substring(
+          file.path.lastIndexOf("/projects/") + 10,
+          file.path.lastIndexOf("/thumbnails/")
+        );
+       }))
+      .on('end', function() { console.log(projectName) })
+      .pipe(
+        newer(
+          thumbnailsDestination +
+          '/' +
+          projectName +
+          '/thumbnails/' +
+          transformation.width
+        )
+      )
+      // Resize the image
+      .pipe(imageResize({
+        width : transformation.width,
+        height : 0,
+        colorspace: 'sRGB',
+        crop : false,
+        filter: 'Lanczos',
+        format: 'jpg',
+        interlace: true,
+        imageMagick: true,
+        noProfile: true,
+        quality: 0.88,
+        sharpen: transformation.sharpen,
+        upscale : false
+      }))
+      .pipe(rename(function (path) {
+          //path.dirname = path.dirname.replace(/src/i, transformation.width.toString());
+          path.dirname = path.dirname.concat('/' + transformation.width.toString() + '/');
+      }))
+      .pipe(dest(thumbnailsDestination))
+    );
+  });
+
+  // Merge the streams
+  return merge2(streams);
+
+  cb();
+}
+
+/*
+** Resize images
+*/
+
+function resizeImages(cb) {
+
+  // Create an array
+  const streams = [];
+
+  // Go through the array of transformations
+  imageTransformations.forEach(function (transformation) {
+    streams.push(
+      src(imagesSource, { nodir: true }) // ignore empty directories
       // Retrieve the name of the project folder and save it in the global variable 'projectName'
       .pipe(tap(function(file, t) {
         // Cut the name of the project out from the path to the file
@@ -89,7 +174,7 @@ function resize(cb) {
       .on('end', function() { console.log(projectName) })
       .pipe(
         newer(
-          imageDestination +
+          imagesDestination +
           '/' +
           projectName +
           '/images/' +
@@ -112,9 +197,10 @@ function resize(cb) {
         upscale : false
       }))
       .pipe(rename(function (path) {
-          path.dirname = path.dirname.replace(/src/i, transformation.width.toString());
+          //path.dirname = path.dirname.replace(/src/i, transformation.width.toString());
+          path.dirname = path.dirname.concat('/' + transformation.width.toString() + '/');
       }))
-      .pipe(dest(imageDestination))
+      .pipe(dest(imagesDestination))
     );
   });
 
@@ -129,12 +215,13 @@ function resize(cb) {
 // See https://gulpjs.com/docs/en/getting-started/creating-tasks
 
 exports.hello = hello;
-exports.resize = resize;
+exports.resizeThumbnails = resizeThumbnails;
+exports.resizeImages = resizeImages;
 
 // Use series() and parallel() to compose tasks
 // A composition of tasks composed with series() ends after an error
 // See https://gulpjs.com/docs/en/getting-started/creating-tasks
 
 exports.default = function() {
-  watch(imageSource, series(resize));
+  watch(imagesSource, series(resizeImages));
 };
