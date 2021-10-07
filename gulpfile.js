@@ -28,20 +28,9 @@ var   projectName;
 
 const thumbnailTransformations = [
  {
-   width: 360,
-   sharpen: '0.25x0.25+0.25+0.05' // 0.5x0.5+0.5+0.1
- },
- {
-   width: 720,
-   sharpen: '0.25x0.25+0.25+0.05'
- },
- {
-   width: 1080,
-   sharpen: '0.25x0.25+0.25+0.05'
- },
- {
-   width: 1440,
-   sharpen: '0.25x0.25+0.25+0.05'
+   quality: 0.76,
+   sharpen: '0.25x0.25+0.25+0.05',
+   width: 1440
  },
 ];
 
@@ -50,30 +39,36 @@ const thumbnailTransformations = [
 */
 
 const imageTransformations = [
- {
-   width: 360,
-   sharpen: '0.25x0.25+0.25+0.05' // 0.5x0.5+0.5+0.1
- },
- {
-   width: 720,
-   sharpen: '0.25x0.25+0.25+0.05'
- },
- {
-   width: 1080,
-   sharpen: '0.25x0.25+0.25+0.05'
- },
- {
-   width: 1440,
-   sharpen: '0.25x0.25+0.25+0.05'
- },
- {
-   width: 2160,
-   sharpen: '0.25x0.25+0.25+0.05'
- },
- {
-   width: 2880,
-   sharpen: '0.25x0.25+0.25+0.05'
- },
+  {
+    quality: 0.88,
+    sharpen: '0.25x0.25+0.25+0.05', // 0.5x0.5+0.5+0.1
+    width: 360
+  },
+  {
+    quality: 0.84,
+    sharpen: '0.25x0.25+0.25+0.05',
+    width: 720
+  },
+  {
+    quality: 0.80,
+    sharpen: '0.25x0.25+0.25+0.05',
+    width: 1080
+  },
+  {
+    quality: 0.76,
+    sharpen: '0.25x0.25+0.25+0.05',
+    width: 1440
+  },
+  {
+    quality: 0.72,
+    sharpen: '0.25x0.25+0.25+0.05',
+    width: 2160
+  },
+  {
+    quality: 0.72,
+    sharpen: '0.25x0.25+0.25+0.05',
+    width: 2880
+  },
 ];
 
 // -------------------------------------
@@ -128,11 +123,11 @@ function resizeThumbnails(cb) {
         colorspace: 'sRGB',
         crop : false,
         filter: 'Lanczos',
-        format: 'jpg',
+        format: 'jp2',
         interlace: true,
         imageMagick: true,
         noProfile: true,
-        quality: 0.88,
+        quality: transformation.quality,
         sharpen: transformation.sharpen,
         upscale : false
       }))
@@ -188,11 +183,11 @@ function resizeImages(cb) {
         colorspace: 'sRGB',
         crop : false,
         filter: 'Lanczos',
-        format: 'jpg',
+        format: 'jp2',
         interlace: true,
         imageMagick: true,
         noProfile: true,
-        quality: 0.88,
+        quality: transformation.quality,
         sharpen: transformation.sharpen,
         upscale : false
       }))
