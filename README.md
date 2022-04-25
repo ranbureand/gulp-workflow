@@ -1,8 +1,13 @@
-# gulp-workflow
+# Gulp Workflow
 
-Gulp
+Install node js
+brew install node
 
-uffi
+** gulp resizeThumbnails
+
+** gulp resizeImages
+
+** gulp hello
 
 https://stackoverflow.com/questions/50100533/gulp-dest-when-using-multiple-globs
 

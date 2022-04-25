@@ -77,6 +77,7 @@ const imageTransformations = [
 
 /*
 ** Hello world!
+** gulp hello
 */
 
 function hello(cb) {
@@ -87,6 +88,7 @@ function hello(cb) {
 
 /*
 ** Resize thumbnails
+** gulp resizeThumbnails
 */
 
 function resizeThumbnails(cb) {
@@ -147,6 +149,7 @@ function resizeThumbnails(cb) {
 
 /*
 ** Resize images
+** gulp resizeImages
 */
 
 function resizeImages(cb) {
@@ -183,7 +186,7 @@ function resizeImages(cb) {
         colorspace: 'sRGB',
         crop : false,
         filter: 'Lanczos',
-        format: 'jp2',
+        format: 'jpg',
         interlace: true,
         imageMagick: true,
         noProfile: true,
